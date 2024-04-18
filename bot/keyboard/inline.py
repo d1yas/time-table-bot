@@ -59,6 +59,13 @@ table_student = InlineKeyboardMarkup(
 
     ]
 )
+# student_class = InlineKeyboardMarkup(
+#     inline_keyboard=[
+#         [
+#             InlineKeyboardButton(text=)
+#         ]
+#     ]
+# )
 teacher = InlineKeyboardMarkup(
     inline_keyboard=[
 
