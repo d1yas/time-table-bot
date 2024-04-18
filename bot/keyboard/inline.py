@@ -3,10 +3,10 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 start_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [
-            InlineKeyboardButton(text="Я ученик", callback_data="student")
+            InlineKeyboardButton(text="Для учеников", callback_data="student")
         ],
         [
-            InlineKeyboardButton(text="Я учитель", callback_data="teacher")
+            InlineKeyboardButton(text="Для учителей", callback_data="teacher")
         ]
     ]
 

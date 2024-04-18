@@ -1,15 +1,15 @@
-# from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-#
-# keyboard = ReplyKeyboardMarkup(
-#     keyboard=[
-#         [
-#             KeyboardButton(text="Ученик")
-#         ],
-#         [
-#             KeyboardButton(text='Учитель')
-#         ],
-#         [
-#             KeyboardButton(text='О боте')
-#         ],
-#     ], resize_keyboard=True
-# )
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+keyboard_def = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="Расписание")
+        ],
+        [
+            KeyboardButton(text='Время звонков')
+        ],
+        [
+            KeyboardButton(text='О боте')
+        ],
+    ], resize_keyboard=True
+)
