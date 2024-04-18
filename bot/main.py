@@ -2,9 +2,7 @@ import logging
 from aiogram.types import ReplyKeyboardRemove
 from aiogram import Bot, Dispatcher, types, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from keyboards.default import keyboard
-from keyboards.inline import Katalog1, Katalog2
-from states import CallbackStates
+from keyboard.inline import start_menu
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 # ------------------------DATABASE--------------------
 from aiogram.dispatcher import FSMContext
@@ -13,16 +11,17 @@ from aiogram.types import InputMedia
 
 connect = sqlite3.connect('../db.sqlite3', check_same_thread=False)
 cursor = connect.cursor()
-from environs import Env
+# from environs import Env
 
 
-env = Env()
-env.read_env()
+# env = Env()
+# env.read_env()
+#
+API_TOKEN = '7035105679:AAHcWXjb97wm2DyH8le5juzsHNT2G9hGHu4'
 
-
-API_TOKEN = env.str("API_TOKEN")
-ADMINS = env.list("ADMINS")
-IP = env.str("ip")
+# API_TOKEN = env.str("API_TOKEN")
+# ADMINS = env.list("ADMINS")
+# IP = env.str("ip")
 
 # ------------------------DATABASE--------------------
 
@@ -30,3 +29,12 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+
+@dp.message_handler(commands='start')
+async def start_bot(message: types.Message):
+    await message.answer("Добро пожаловать .\nКем вы являетесь ? ", reply_markup=start_menu)
+
+
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
