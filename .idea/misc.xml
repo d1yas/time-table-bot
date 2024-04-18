@@ -4,4 +4,7 @@
     <option name="sdkName" value="Python 3.6 (ip_info) (2)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (time-table-bot)" project-jdk-type="Python SDK" />
+  <component name="PyCharmProfessionalAdvertiser">
+    <option name="shown" value="true" />
+  </component>
 </project>
