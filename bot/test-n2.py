@@ -5,12 +5,13 @@ import logging
 from aiogram.types import ReplyKeyboardRemove
 from aiogram import Bot, Dispatcher, types, executor
 from keyboard.inline_testn2 import teacher
+from keyboard.default import keyboard_def
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from keyboard.default import keyboard_def
 from states import CallbackStates
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 import sqlite3
-from UserApp.models import TeacherModel, StudentModel
+# from UserApp.models import TeacherModel, StudentModel
 
 connect = sqlite3.connect('../db.sqlite3', check_same_thread=False)
 cursor = connect.cursor()
@@ -23,10 +24,14 @@ dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 
 
+
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    await message.answer("Добро пожаловать .\nРасписание Для Учителей /teacher\nРасписание Для Учеников /student")
+    await message.answer("Добро пожаловать .\nРасписание Для Учителей /teacher\nРасписание Для Учеников /student", reply_markup=keyboard_def)
 
+@dp.message_handler(text="О боте")
+async def about_bot(message: types.Message):
+    await message.answer("Этот бот зделан дял школы 210 .\nЧто бы видеть расписание учеников и учетилей")
 
 @dp.message_handler(commands=['teacher'])
 async def teacher_command(message: types.Message):
@@ -74,6 +79,9 @@ async def teach1(call: types.CallbackQuery):
             await call.message.answer_media_group(media=media_group)
         else:
             await call.message.answer("Нет данных об учителе.")
+
+
+
 
 
 
