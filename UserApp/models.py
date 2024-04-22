@@ -1,24 +1,13 @@
 from django.db import models
 import os
+
+
 class TeacherModel(models.Model):
-    surname = models.CharField(max_length=20)
-    name = models.CharField(max_length=20)
-    patronymic = models.CharField(max_length=20)
+    fio_teacher = models.CharField(max_length=25)
     table = models.ImageField(upload_to="uploads/teacher/")
 
     def __str__(self):
-        return f"{self.surname} {self.name} {self.patronymic}"
-
-
-
-
-
-def get_upload_path(instance, filename):
-    # Определяем путь к папке в зависимости от выбранного класса
-    class_folder = instance.class_name.replace(" ", "_").lower()
-    # Составляем путь для сохранения изображения
-    upload_path = os.path.join("uploads", "students", class_folder, filename)
-    return upload_path
+        return self.fio_teacher
 
 
 class StudentModel(models.Model):
@@ -92,11 +81,7 @@ class StudentModel(models.Model):
     )
 
     class_name = models.CharField(choices=CHOICES, max_length=225)
-    time_table_students = models.ImageField(upload_to=get_upload_path)
-    add_table = models.ImageField(upload_to=get_upload_path)
+    time_table_students = models.ImageField(upload_to="uploads/students/")
 
     def __str__(self):
         return self.class_name
-
-
-

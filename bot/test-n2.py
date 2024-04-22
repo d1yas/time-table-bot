@@ -4,8 +4,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMedia
 import logging
 from aiogram.types import ReplyKeyboardRemove
 from aiogram import Bot, Dispatcher, types, executor
+from keyboard.inline_testn2 import teacher_chapter1 , teacher_chapter2
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from keyboard.inline import start_menu, table_student, teacher
 from keyboard.default import keyboard_def
 from states import CallbackStates
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
@@ -24,32 +24,23 @@ dp.middleware.setup(LoggingMiddleware())
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    # Создание инлайн клавиатуры для выбора роли пользователя
-    markup = InlineKeyboardMarkup()
-    markup.row(
-        InlineKeyboardButton("Ученик", callback_data="student"),
-        InlineKeyboardButton("Учитель", callback_data="teacher")
-    )
-    await message.reply("Кто вы?", reply_markup=markup)
+    await message.answer("Добро пожаловать .\nРасписание Для Учителей /teacher\nРасписание Для Учеников /student")
+
+@dp.message_handler(commands=['teacher'])
+async def teacher_command(message: types.Message):
+    await message.answer("Как вас зовут\nПервый список:", reply_markup=teacher_chapter1)
+    await message.answer("Второй список:",reply_markup=teacher_chapter2)
+    # await message.answer("Третий список список:",reply_markup=)
+    # await message.answer("Четвертый список:",reply_markup=)
+    # await message.answer("Пятый список:", reply_markup=)
+@dp.callback_query_handler(text='Нигора,Абдукадирова,Абдуфаттаховна')
+async def teach1(call: types.CallbackQuery):
 
 
-@dp.callback_query_handler(lambda c: c.data == 'student' or c.data == 'teacher')
-async def process_callback_button(callback_query: types.CallbackQuery):
-    # Если пользователь выбрал "Ученик"
-    if callback_query.data == 'student':
-        # Создание инлайн клавиатуры с выбором класса
-        markup = InlineKeyboardMarkup()
-        for grade in range(1, 12):
-            markup.row(
-                InlineKeyboardButton(f"{grade} класс", callback_data=f"grade_{grade}")
-            )
-        markup.row(
-            InlineKeyboardButton("Назад", callback_data="start")
-        )
-        await bot.send_message(callback_query.from_user.id, "Выберите класс:", reply_markup=markup)
-    # Если пользователь выбрал "Учитель"
-    elif callback_query.data == 'teacher':
-        await bot.send_message(callback_query.from_user.id, "Введите имя, фамилию и отчество учителя через пробел")
+
+
+
+
 
 
 if __name__ == '__main__':
