@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-
+#test
 class Shogirdchala(StatesGroup):
     list_class = State()
     class_data = State()
