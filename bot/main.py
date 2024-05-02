@@ -1,89 +1,134 @@
 import logging
-from aiogram.types import ReplyKeyboardRemove
-from aiogram import Bot, Dispatcher, types, executor
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from keyboard.inline import start_menu, table_student,  teacher
-from keyboard.default import keyboard_def
-from states import CallbackStates
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
-
-# ------------------------DATABASE--------------------
-from aiogram.dispatcher import FSMContext
 import sqlite3
-from aiogram.types import InputMedia
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from keyboards.default import keyboard_def
 
-connect = sqlite3.connect('../db.sqlite3', check_same_thread=False)
+# from config import DB,TOKEN,UPLOADS
+TOKEN = "7035105679:AAHcWXjb97wm2DyH8le5juzsHNT2G9hGHu4"
+# DB = "C:/Users/steam/PycharmProjects/FOR-SCHOOL-BOT/db.sqlite3"
+UPLOADS = "C:/Users/steam/PycharmProjects/time-table-bot/"
+
+connect = sqlite3.connect("C:/Users/steam/PycharmProjects/time-table-bot/db.sqlite3", check_same_thread=False)
 cursor = connect.cursor()
-# from environs import Env
-
-
-# env = Env()
-# env.read_env()
-#
-
-
-# API_TOKEN = env.str("API_TOKEN")
-# ADMINS = env.list("ADMINS")
-# IP = env.str("ip")
-
-# ------------------------DATABASE--------------------
-API_TOKEN = '7035105679:AAHcWXjb97wm2DyH8le5juzsHNT2G9hGHu4'
-
-
-
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=API_TOKEN, parse_mode='HTML')
+bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
+class Shogirdchala(StatesGroup):
+    list_class = State()
+    class_data = State()
+    teacher_data = State()
+    zvanok = State()
 
-# @dp.message_handler(commands=['search'])
-# async def search(message: types.Message):
-#     def find_teacher(name, surname, patronymic):
-#         cursor.execute("SELECT * FROM UserApp_teachermodel WHERE name = ? AND surname = ? AND patronymic = ?",
-#                        (name, surname, patronymic))
-#         return cursor.fetchall()
-#     user_input = message.text.split()
-#     if len(user_input) != 4:
-#         await message.reply("Неправильный формат запроса. Используйте: /search <name> <surname> <patronymic>")
-#         return
-#     _, name, surname, patronymic = user_input
-#     teachers = find_teacher(name, surname, patronymic)
-#     if teachers:
-#         for teacher in teachers:
-#             teacher_info = f"Имя: {teacher[1]}\nФамилия: {teacher[2]}\nОтчество: {teacher[3]}"
-#             await message.reply(teacher_info)
-#     else:
-#         await message.reply("Учитель не найден")
-#
-#
-#
-# @dp.message_handler(commands='start')
-# async def start_bot(message: types.Message):
-#     await message.answer("Добро пожаловать . ", reply_markup=keyboard_def)
-#     await CallbackStates.start_state.set()
-#
-# @dp.message_handler(text="Расписание")
-# async def ros(message: types.Message):
-#     await message.answer("Выберите Категорию", reply_markup=start_menu)
-# @dp.callback_query_handler(text="Для учеников")
-# async def student_btn(call: types.CallbackQuery):
-#
-#
-#
-#
-# # @dp.message_handler(text="Я ученик")
-# # async def student(message: types.Message):
-# #     await message.answer("Выберите класс")
-# #     await message.answer('Class', reply_markup=table_student)
-#
-#
-#
-# @dp.message_handler(text="Время звонков")
-# async def time_zv(message: types.Message):
-#     await message.answer("Время звоноков")
 
+# Handlers
+@dp.message_handler(commands='start')
+async def process_start_command(message: types.Message):
+    await message.answer("Добро Пожаловать", reply_markup=keyboard_def)
+
+
+@dp.message_handler(text="Расписание клас"
+                         "сов")
+async def class_schedule(message: types.Message, state: FSMContext):
+    await message.delete()
+    button_list = [InlineKeyboardButton(text=str(i) + " " + "класс", callback_data=str(i)) for i in range(1, 12)]
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    keyboard.add(*button_list, )
+    await message.answer("Выберите ваш класс : ", reply_markup=keyboard)
+    await Shogirdchala.list_class.set()
+
+
+@dp.callback_query_handler(state=Shogirdchala.list_class)
+async def sinf_jadvali(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    class_number = int(call.data)
+    cursor.execute("SELECT * FROM UserApp_studentstable WHERE class_number = ?", (class_number,))
+    result = cursor.fetchall()
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    for i in result:
+        button_text = f"{i[1]} {i[2]}"
+        button_callback_data = f"{i[0]}"
+        button = InlineKeyboardButton(text=button_text, callback_data=button_callback_data)
+        keyboard.add(button)
+    await call.message.answer(str(class_number), reply_markup=keyboard)
+    await state.finish()
+    await Shogirdchala.class_data.set()
+
+
+@dp.callback_query_handler(state=Shogirdchala.class_data)
+async def classss(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    data = int(call.data)
+    cursor.execute("SELECT * FROM UserApp_studentstable WHERE id = ?", (data,))
+    result = cursor.fetchall()
+    photo = open(f'{UPLOADS}{result[0][3]}', 'rb')
+    caption = f"Класс: {result[0][1]} {result[0][2]}"
+    await call.message.answer_photo(photo=photo, caption=caption)
+    await state.finish()
+
+
+@dp.message_handler(text="Расписание учителей")
+async def list_teacherss(message: types.Message):
+    await message.delete()
+    teachers_data = cursor.execute("SELECT * FROM UserApp_teachertablemodel ").fetchall()
+    if teachers_data:
+        keyboard = InlineKeyboardMarkup(row_width=4)
+        for i in teachers_data:
+            button = InlineKeyboardButton(text=str(i[1]), callback_data=str(i[1]))
+            keyboard.add(button)
+        await message.answer("Список Учителей", reply_markup=keyboard)
+        await Shogirdchala.teacher_data.set()
+    else:
+        await message.answer("Error!\nРасписание для учителя в данный момент отсутствует")
+
+
+@dp.callback_query_handler(state=Shogirdchala.teacher_data)
+async def teacheddata(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    data = str(call.data)
+    result = cursor.execute("SELECT * FROM UserApp_teachertablemodel WHERE fio_teacher = ?", (data,)).fetchone()
+    photo = open(f'{UPLOADS}{result[2]}', 'rb')
+    await call.message.answer_photo(photo=photo, caption=f"""
+ФИО: {result[1]}    
+    """)
+    await state.finish()
+
+
+@dp.message_handler(text='Время Звонков')
+async def chiqishvaqt(message: types.Message):
+    await message.delete()
+    data = cursor.execute("SELECT * FROM UserApp_calltimesmodel ").fetchall()
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    for i in data:
+        button = InlineKeyboardButton(text=str(i[1]), callback_data=str(i[0]))
+        keyboard.add(button)
+    await message.answer("Время звонков:", reply_markup=keyboard)
+    await Shogirdchala.zvanok.set()
+
+
+@dp.callback_query_handler(state=Shogirdchala.zvanok)
+async def zvanokjadval(call: types.CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    data = int(call.data)
+    i = cursor.execute("SELECT * FROM UserApp_calltimesmodel where id = ?", (data,)).fetchone()
+    photo = open(f'{UPLOADS}{i[2]}', 'rb')
+    await call.message.answer_photo(photo=photo, caption=f"""
+День: {i[1]}     
+    """)
+    await state.finish()
+
+
+# @dp.message_handler(commands={"help"})
+# async def tex(message: types.Message):
+#     await message.answer("")
+#
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

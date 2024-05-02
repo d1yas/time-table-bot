@@ -32,4 +32,5 @@ python manage.py migrate
 ## 6) create your superuser
 ```angular2html
 python manage.py createsuperuser
+
 ```
