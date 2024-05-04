@@ -2,14 +2,12 @@ import logging
 import sqlite3
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from keyboards.default import keyboard_def
-
-# from config import DB,TOKEN,UPLOADS
-TOKEN = "7035105679:AAHcWXjb97wm2DyH8le5juzsHNT2G9hGHu4"
+from config import ADMIN_ID, TOKEN
 # DB = "C:/Users/steam/PycharmProjects/FOR-SCHOOL-BOT/db.sqlite3"
 UPLOADS = "C:/Users/steam/PycharmProjects/time-table-bot/"
 
@@ -20,7 +18,12 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-#test
+
+async def send_message_to_admin(user: types.User, message_text: str):
+    await bot.send_message(ADMIN_ID, f"Этот пользователь @{user.username} ({user.id}) написал: \"{message_text}\"")
+
+
+# test
 class Shogirdchala(StatesGroup):
     list_class = State()
     class_data = State()
@@ -28,17 +31,31 @@ class Shogirdchala(StatesGroup):
     zvanok = State()
 
 
+# @dp.message_handler(text=all)
+# async def admin(message: types.Message):
+#     user = message.from_user
+#     message_text = message.text
+#     await send_message_to_admin(user, message_text)
+
+
+
 # Handlers
 @dp.message_handler(commands='start')
 async def process_start_command(message: types.Message):
+    user = message.from_user
+    message_text = message.text
+    await send_message_to_admin(user, message_text)
     await message.answer("Добро Пожаловать", reply_markup=keyboard_def)
 
 
 @dp.message_handler(text="Расписание клас"
-                         "сов")
+                         "сов🧑‍🎓")
 async def class_schedule(message: types.Message, state: FSMContext):
+    user = message.from_user
+    message_text = message.text
+    await send_message_to_admin(user, message_text)
     await message.delete()
-    button_list = [InlineKeyboardButton(text=str(i) + " " + "класс", callback_data=str(i)) for i in range(1, 12)]
+    button_list = [InlineKeyboardButton(text=str(i) + " " + "класс", callback_data=str(i)) for i in range(5, 12)]
     keyboard = InlineKeyboardMarkup(row_width=1)
     keyboard.add(*button_list, )
     await message.answer("Выберите ваш класс : ", reply_markup=keyboard)
@@ -58,6 +75,9 @@ async def sinf_jadvali(call: types.CallbackQuery, state: FSMContext):
         button = InlineKeyboardButton(text=button_text, callback_data=button_callback_data)
         keyboard.add(button)
     await call.message.answer(str(class_number), reply_markup=keyboard)
+    user = call.message.from_user
+    call_text = call.message
+    await send_message_to_admin(user, call_text)
     await state.finish()
     await Shogirdchala.class_data.set()
 
@@ -71,11 +91,17 @@ async def classss(call: types.CallbackQuery, state: FSMContext):
     photo = open(f'{UPLOADS}{result[0][3]}', 'rb')
     caption = f"Класс: {result[0][1]} {result[0][2]}"
     await call.message.answer_photo(photo=photo, caption=caption)
+    user = call.message.from_user
+    call_text = call.message
+    await send_message_to_admin(user, call_text)
     await state.finish()
 
 
-@dp.message_handler(text="Расписание учителей")
+@dp.message_handler(text="Расписание учителей👩‍🏫")
 async def list_teacherss(message: types.Message):
+    user = message.from_user
+    message_text = message.text
+    await send_message_to_admin(user, message_text)
     await message.delete()
     teachers_data = cursor.execute("SELECT * FROM UserApp_teachertablemodel ").fetchall()
     if teachers_data:
@@ -98,11 +124,17 @@ async def teacheddata(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer_photo(photo=photo, caption=f"""
 ФИО: {result[1]}    
     """)
+    user = call.message.from_user
+    call_text = call.message
+    await send_message_to_admin(user, call_text)
     await state.finish()
 
 
-@dp.message_handler(text='Время Звонков')
+@dp.message_handler(text='Время Звонков🕔')
 async def chiqishvaqt(message: types.Message):
+    user = message.from_user
+    message_text = message.text
+    await send_message_to_admin(user, message_text)
     await message.delete()
     data = cursor.execute("SELECT * FROM UserApp_calltimesmodel ").fetchall()
     keyboard = InlineKeyboardMarkup(row_width=2)
@@ -122,13 +154,23 @@ async def zvanokjadval(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer_photo(photo=photo, caption=f"""
 День: {i[1]}     
     """)
+    user = call.message.from_user
+    call_text = call.message
+    await send_message_to_admin(user, call_text)
     await state.finish()
 
 
-# @dp.message_handler(commands={"help"})
-# async def tex(message: types.Message):
-#     await message.answer("")
-#
+@dp.message_handler(commands={"help"})
+async def tex(message: types.Message):
+    user = message.from_user
+    message_text = message.text
+    await send_message_to_admin(user, message_text)
+    await message.answer(f"""
+Если возникли какие-то проблемы ,
+Напишите @backend_developer_d
+
+""")
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
