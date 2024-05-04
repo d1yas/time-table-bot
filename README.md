@@ -34,3 +34,8 @@ python manage.py migrate
 python manage.py createsuperuser
 
 ```
+## 7)
+
+```angular2html
+python bot/main.py
+```
