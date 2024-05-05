@@ -8,9 +8,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from keyboards.default import keyboard_def
 from config import ADMIN_ID, TOKEN
-# DB = "C:/Users/steam/PycharmProjects/FOR-SCHOOL-BOT/db.sqlite3"
-UPLOADS = "C:/Users/steam/PycharmProjects/time-table-bot/"
 
+
+UPLOADS = "C:/Users/steam/PycharmProjects/time-table-bot/"
 connect = sqlite3.connect("C:/Users/steam/PycharmProjects/time-table-bot/db.sqlite3", check_same_thread=False)
 cursor = connect.cursor()
 
@@ -23,20 +23,12 @@ async def send_message_to_admin(user: types.User, message_text: str):
     await bot.send_message(ADMIN_ID, f"Этот пользователь @{user.username} ({user.id}) написал: \"{message_text}\"")
 
 
-# test
+# state
 class Shogirdchala(StatesGroup):
     list_class = State()
     class_data = State()
     teacher_data = State()
     zvanok = State()
-
-
-# @dp.message_handler(text=all)
-# async def admin(message: types.Message):
-#     user = message.from_user
-#     message_text = message.text
-#     await send_message_to_admin(user, message_text)
-
 
 
 # Handlers
@@ -46,6 +38,8 @@ async def process_start_command(message: types.Message):
     message_text = message.text
     await send_message_to_admin(user, message_text)
     await message.answer("Добро Пожаловать", reply_markup=keyboard_def)
+
+
 
 
 @dp.message_handler(text="Расписание клас"
@@ -60,6 +54,8 @@ async def class_schedule(message: types.Message, state: FSMContext):
     keyboard.add(*button_list, )
     await message.answer("Выберите ваш класс : ", reply_markup=keyboard)
     await Shogirdchala.list_class.set()
+
+
 
 
 @dp.callback_query_handler(state=Shogirdchala.list_class)
@@ -82,6 +78,8 @@ async def sinf_jadvali(call: types.CallbackQuery, state: FSMContext):
     await Shogirdchala.class_data.set()
 
 
+
+
 @dp.callback_query_handler(state=Shogirdchala.class_data)
 async def classss(call: types.CallbackQuery, state: FSMContext):
     await call.message.delete()
@@ -95,6 +93,8 @@ async def classss(call: types.CallbackQuery, state: FSMContext):
     call_text = call.message
     await send_message_to_admin(user, call_text)
     await state.finish()
+
+
 
 
 @dp.message_handler(text="Расписание учителей👩‍🏫")
@@ -115,6 +115,8 @@ async def list_teacherss(message: types.Message):
         await message.answer("Error!\nРасписание для учителя в данный момент отсутствует")
 
 
+
+
 @dp.callback_query_handler(state=Shogirdchala.teacher_data)
 async def teacheddata(call: types.CallbackQuery, state: FSMContext):
     await call.message.delete()
@@ -128,6 +130,8 @@ async def teacheddata(call: types.CallbackQuery, state: FSMContext):
     call_text = call.message
     await send_message_to_admin(user, call_text)
     await state.finish()
+
+
 
 
 @dp.message_handler(text='Время Звонков🕔')
@@ -145,6 +149,8 @@ async def chiqishvaqt(message: types.Message):
     await Shogirdchala.zvanok.set()
 
 
+
+
 @dp.callback_query_handler(state=Shogirdchala.zvanok)
 async def zvanokjadval(call: types.CallbackQuery, state: FSMContext):
     await call.message.delete()
@@ -158,6 +164,8 @@ async def zvanokjadval(call: types.CallbackQuery, state: FSMContext):
     call_text = call.message
     await send_message_to_admin(user, call_text)
     await state.finish()
+
+
 
 
 @dp.message_handler(commands={"help"})
