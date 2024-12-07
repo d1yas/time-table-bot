@@ -42,8 +42,7 @@ async def process_start_command(message: types.Message):
 
 
 
-@dp.message_handler(text="Расписание клас"
-                         "сов🧑‍🎓")
+@dp.message_handler(text="Расписание классов🧑‍🎓")
 async def class_schedule(message: types.Message, state: FSMContext):
     user = message.from_user
     message_text = message.text
